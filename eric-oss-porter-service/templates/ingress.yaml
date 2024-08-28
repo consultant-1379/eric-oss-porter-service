@@ -1,0 +1,37 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eric-oss-porter-service
+  labels:
+    app.kubernetes.io/name: eric-oss-porter-service
+  annotations:
+    app.kubernetes.io/name: eric-oss-porter-service
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.ingress.hostname | quote }}
+      http:
+        paths:
+          - path: /communications/*
+            pathType: Prefix
+            backend:
+              service:
+                name: "eric-oss-communications"
+                port:
+                  number: {{ .Values.service2.port }}
+          - path: /restsim-offerings/
+            pathType: Prefix
+            backend:
+              service:
+                name: "eric-oss-restsim-offerings"
+                port:
+                  number: {{ .Values.service3.port }}
+          - path: /user-management/
+            pathType: Prefix
+            backend:
+              service:
+                name: "eric-oss-user-management"
+                port:
+                  number: {{ .Values.service1.port }}
+{{- end }}

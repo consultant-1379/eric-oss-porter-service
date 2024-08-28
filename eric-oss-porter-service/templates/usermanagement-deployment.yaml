@@ -1,0 +1,90 @@
+{{- $g := fromJson (include "eric-oss-porter-service.global" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{- include "eric-oss-porter-service-usermanagement-name" . | indent 4 }}
+  labels:
+{{- include "eric-oss-porter-service-usermanagement.labels" . | indent 4 }}
+  annotations:
+{{- include "eric-oss-porter-service.annotations" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eric-oss-porter-usermanagement
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{- include "eric-oss-porter-service-usermanagement.labels" . | indent 8 }}
+      annotations:
+        {{- $commonAnn := include "eric-oss-porter-service.annotations" . | fromYaml -}}
+        {{- include "eric-oss-porter-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $commonAnn )) | trim | nindent 8 }}
+    spec:
+    {{- if .Values.podPriority }}
+    {{- if .Values.podPriority.priorityClassName }}
+      priorityClassName: {{ .Values.podPriority.priorityClassName | quote }}
+    {{- end }}
+    {{- end }}
+      serviceAccountName: {{ include "eric-oss-porter-service.name" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image1.repository }}:{{ .Values.image1.tag }}"
+          imagePullPolicy: {{ template "eric-oss-porter-service.registryImagePullPolicy" . }}
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources.porter | nindent 12 }}
+          env:
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: eric-oss-porter-postgres-pg-secret
+                key: custom-user
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: eric-oss-porter-postgres-pg-secret
+                key: custom-pwd
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - sh
+                - -c
+                - sleep 20; cd postgres;bash start_script.sh > /tmp/restore_dumps.log
+          readinessProbe:
+            exec:
+                command:
+                - sh
+                - -c
+                - echo "wait for 40 seconds to bring up the database"
+            initialDelaySeconds: {{ .Values.probes.maincontainer.readinessProbe.initialDelaySeconds }}
+            failureThreshold: {{ .Values.probes.maincontainer.readinessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.probes.maincontainer.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.probes.maincontainer.readinessProbe.successThreshold }}
+            timeoutSeconds: {{ .Values.probes.maincontainer.readinessProbe.timeoutSeconds }}
+          volumeMounts:
+          - name: {{ include "eric-oss-porter-service.name" . }}-app-configmap
+            mountPath: /etc/config/
+            #  subpath: file.conf
+      volumes:
+        - name: {{ include "eric-oss-porter-service.name" . }}-app-configmap
+          configMap:
+              name: {{ include "eric-oss-porter-service.name" . }}-app-configmap
+              items:
+                - key: "data.conf"
+                  path: "data.conf"
+      {{- if include "eric-oss-porter-service.pullSecrets" . }}
+      imagePullSecrets:
+        - name: {{ template "eric-oss-porter-service.pullSecrets" . }}
+      {{- end }}
+      {{- if (or .Values.nodeSelector $g.nodeSelector) }}
+      nodeSelector:
+        {{- include "eric-oss-porter-service.nodeSelector" . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 6 }}
+    {{- end }}

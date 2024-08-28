@@ -1,0 +1,28 @@
+{{- define "eric-oss-porter-service.product-labels" -}}
+app.kubernetes.io/name: "{{ template "eric-oss-porter-service.name" . }}"
+app.kubernetes.io/version: "{{ template "eric-oss-porter-service.version" . }}"
+app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+helm.sh/chart: "{{ template "eric-oss-porter-service.chart" . }}"
+{{- end -}}
+{{- define "eric-oss-porter-service-restsim-offerings.labels" -}}
+app.kubernetes.io/name: eric-oss-porter-restsimofferings
+app.kubernetes.io/version: "{{ template "eric-oss-porter-service.version" . }}"
+app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+helm.sh/chart: "{{ template "eric-oss-porter-service.chart" . }}"
+{{- end -}}
+{{- define "eric-oss-porter-service-communications.labels" -}}
+app.kubernetes.io/name: eric-oss-porter-communications
+app.kubernetes.io/version: "{{ template "eric-oss-porter-service.version" . }}"
+app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+helm.sh/chart: "{{ template "eric-oss-porter-service.chart" . }}"
+{{- end -}}
+{{- define "eric-oss-porter-service-user-management.labels" -}}
+app.kubernetes.io/name: eric-oss-porter-usermanagement
+app.kubernetes.io/version: "{{ template "eric-oss-porter-service.version" . }}"
+app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+helm.sh/chart: "{{ template "eric-oss-porter-service.chart" . }}"
+{{- end -}}

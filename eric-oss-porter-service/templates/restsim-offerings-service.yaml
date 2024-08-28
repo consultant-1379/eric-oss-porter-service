@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{- include "eric-oss-porter-service-restsim-offerings-name" . | indent 4 }}
+  labels:
+    {{- include "eric-oss-porter-service-offerings.labels" . | indent 4 }}
+  annotations:
+{{- include "eric-oss-porter-service.annotations" . | indent 4 }}
+
+spec:
+  type: {{ .Values.service3.type }}
+{{- if .Values.global }}
+  {{- if .Values.global.internalIPFamily }}
+  ipFamilies: [{{ .Values.global.internalIPFamily }}]
+  {{- end }}
+{{- end }}
+  loadBalancerIP: {{ .Values.service3.LoadBalancerIP }}
+  ports:
+    - port: {{ .Values.service3.port }}
+      targetPort: 8083
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: eric-oss-porter-restsimofferings
+    app.kubernetes.io/instance: {{ .Release.Name }}

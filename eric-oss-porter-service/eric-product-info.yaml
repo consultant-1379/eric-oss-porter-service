@@ -1,0 +1,12 @@
+productName: "eric-oss-porter-service"
+productNumber: "CXP 000 0000"
+images:
+  eric-oss-restsim-release:
+    productName: "eric-oss-porter-service"
+    productNumber: "CXP 000 0000"
+    registry: "armdocker.rnd.ericsson.se"
+    # Note: recommended to make the value a template and use helm-package script from release automation builder to replace at build time, e.g. repoPath: "MAIN_IMAGE_1.0.0-34"
+    repoPath: "REPO_PATH"
+    name: "eric-oss-porter-service"
+    # Note: recommended to make the value a template and use helm-package script from release automation builder to replace at build time, e.g. tag: "MAIN_IMAGE_proj-eric-oss-restsim/proj-eric-oss-restsim-ci-internal"
+    tag: "VERSION"
